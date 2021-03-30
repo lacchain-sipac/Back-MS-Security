@@ -1,0 +1,69 @@
+server:
+  port: ${PORT_SERVER}
+  
+---
+spring:
+  profiles: default
+  data:
+    mongodb:
+      uri: ${CONEXION_MONGO}/hondurasdb
+---
+springbootwebfluxjjwt:
+  password:
+    encoder:
+      secret: ${SECRET}
+      iteration: ${ITERATION}
+      keylength: ${KEY_LENGTH} 
+---
+spring:
+  redis:
+    host: ${RHOST}
+    port: 6379
+
+  cloud:
+    gateway:
+  
+      routes:
+
+      - id: ms-notify
+        uri: http://ms-notify:8084/
+#        uri: http://localhost:8084/        
+        predicates:
+        - Path=/ms-notify/**
+        filters:
+        - StripPrefix=1
+
+      - id: ms-solicitude
+        uri: http://ms-solicitude:8081/
+#        uri: http://localhost:8081/        
+        predicates:
+        - Path=/ms-solicitude/**
+        filters:
+        - StripPrefix=1
+        
+      - id: ms-parameter
+        uri: http://ms-parameter:8083/
+#        uri: http://localhost:8083/                       
+        predicates:
+        - Path=/ms-parameter/**
+        filters:
+        - StripPrefix=1
+        
+      - id: ms-blockchain
+        uri: http://ms-blockchain:8092/
+#        uri: http://localhost:8083/
+        predicates:
+        - Path=/ms-blockchain/**
+        filters:
+        - StripPrefix=1        
+       
+      - id: ms-user         
+        uri: http://ms-user:8085/        
+        predicates:
+        - Path=/ms-user/**
+        filters:
+     #   - AddResponseHeader=Access-Control-Allow-Origin, *
+     #   - SetResponseHeader=Access-Control-Allow-Origin, *
+     #   - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_FIRST
+        - StripPrefix=1
+        

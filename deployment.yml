@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ms-security-deployment
+  namespace: kube-honduras
+  labels:
+    app: ms-security-honduras
+spec:
+#  replicas: 1
+  selector:
+    matchLabels:
+      app: ms-security-honduras
+  template:
+    metadata:
+      labels:
+        app: ms-security-honduras
+    spec:
+      containers:
+      - env:
+        - name: CONEXION_MONGO
+          valueFrom:
+            secretKeyRef:
+              name: secretsipac
+              key: MONGO_CONNECTION 
+        - name: ITERATION
+          value: "33"
+        - name: KEY_LENGTH
+          value: "256"
+        - name: SECRET
+          value: mysecret
+        - name: MS-NOTIFY
+          value: http://ms-notify:8084
+        - name: PORT_SERVER
+          value: "8090"
+        - name: RHOST
+          value: redis-service
+        - name: MS-BLOCKCHAIN
+          value: http://ms-blockchain:8092
+        image: {{DOCKER_IMAGE_TAG}}
+        name: ms-security
+        # resources:
+        #   requests:
+        #     cpu: 120m
+        #     memory: 128Mi
+        #   limits:
+        #     cpu: 300m
+        #     memory: 256Mi
+        ports:
+        - containerPort: 8090
+      hostname: ms-security
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ms-security
+  namespace: kube-honduras
+  labels:
+    app: ms-security-honduras
+spec:
+  selector:
+    app: ms-security-honduras
+  ports:
+    - protocol: TCP
+      port: 8090
+      targetPort: 8090
+      name: http
+  type: NodePort
